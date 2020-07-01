@@ -75,6 +75,15 @@ namespace CarParkRateCalc.API.Tests.Controllers.ControllerTests.V1
 
         }
 
+        [TestMethod]
+        public async Task CheckNormalDay_AtNightFor1Hour_OK()
+        {
+            //weekend charge of 10
+            var charge = await _controller.CalculateRate(DateTime.Parse("2020-01-01T18:00"), DateTime.Parse("2020-01-01T18:30"));
+            Assert.IsNotNull(charge);
+            Assert.IsTrue((charge.TotalPrice == (decimal)5 && charge.Rate == "Standard"));
+
+        }
 
     }
 }
