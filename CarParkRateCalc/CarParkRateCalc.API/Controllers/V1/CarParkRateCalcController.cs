@@ -27,9 +27,10 @@ namespace CarParkRateCalc.API.Controllers.V1
 #pragma warning disable CS1591
         public CarParkRateCalcController(ICarParkRateCalcService service, IMapper mapper, ILogger<CarParkRateCalcController> logger)
         {
-            _service = service ?? throw new ArgumentNullException("service", "service is mandatory parameter and cannot be null");
-            _mapper = mapper ?? throw new ArgumentNullException("service", "mapper is mandatory parameter and cannot be null"); ;
-            _logger = logger ?? throw new ArgumentNullException("service", "logger is mandatory parameter and cannot be null"); ;
+            
+            _service = service ?? throw new ArgumentNullException(nameof(service));
+            _mapper = mapper ?? throw new ArgumentNullException("mapper", "mapper is mandatory parameter and cannot be null"); ;
+            _logger = logger ?? throw new ArgumentNullException("logger", "logger is mandatory parameter and cannot be null"); ;
         }
 #pragma warning restore CS1591
 
@@ -52,33 +53,36 @@ namespace CarParkRateCalc.API.Controllers.V1
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(Charge))]
         //[ProducesErrorResponseType(typeof(Exception))]
         [HttpGet("entryTime={entryTime}&exitTime={exitTime}")]
-        public async Task<Charge> CalculateRate(DateTime entryTime, DateTime exitTime)
+        public async Task<IActionResult> CalculateRate(DateTime entryTime, DateTime exitTime)
         {
             if (entryTime == DateTime.MinValue || exitTime == DateTime.MinValue)
             {
                 var message = "Entry and exit times cannot be null";
                 _logger.LogDebug($"CarParkRateCalcControllers::RaiseException::{message}");
-                throw new ArgumentException("Incorrect Inputs", message);
+                //throw new ArgumentException("Incorrect Inputs", message);
+                return BadRequest(message);
             }
             if(entryTime > exitTime)
             {
                 var message = "Entry cannot be less than exit time";
                 _logger.LogDebug($"CarParkRateCalcControllers::RaiseException::{message}");
-                throw new ArgumentException("Incorrect Inputs", message);
+                //throw new ArgumentException("Incorrect Inputs", message);
+                return BadRequest(message);
                 //return null;                
             }
             
-            else
-            {
+            
+            
                 _logger.LogDebug($"CarParkRateCalcControllers::CarParkRate - for ::{entryTime} to {exitTime}");
 
                 var data = await _service.CalculateRate(entryTime, exitTime);
 
-                if (data != null)
-                    return _mapper.Map<Charge>(data);
-                else
-                    return null;
-            }
+            if (data != null)
+                return Ok(_mapper.Map<Charge>(data));
+            else
+                //return null;
+                return NoContent();
+            
         }
         #endregion
 
