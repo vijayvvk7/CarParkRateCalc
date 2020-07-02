@@ -32,7 +32,7 @@ namespace CarParkRateCalc.API.Tests.Controllers.ControllerTests.V1
         {
             //Simple test
             var charge = await _controller.CalculateRate(DateTime.Today.AddHours(7), DateTime.Today.AddDays(15));
-
+            
             Assert.IsNotNull(charge);
         }
 
@@ -42,7 +42,11 @@ namespace CarParkRateCalc.API.Tests.Controllers.ControllerTests.V1
             //earlybird charge of 13
             var charge = await _controller.CalculateRate(DateTime.Parse("2020-01-01T07:00"), DateTime.Parse("2020-01-01T17:00"));
             Assert.IsNotNull(charge);
-            Assert.IsTrue( (charge.TotalPrice == (decimal)13.0 && charge.Rate == "EarlyBird"));
+
+            var expectedCharge = new Charge() { Rate = "EarlyBird", TotalPrice = (decimal)13.0 };
+            
+            Assert.AreEqual(charge, expectedCharge);
+            
             
         }
 
@@ -52,8 +56,9 @@ namespace CarParkRateCalc.API.Tests.Controllers.ControllerTests.V1
             //earlybird charge of 13
             var charge = await _controller.CalculateRate(DateTime.Parse("2020-01-01T18:00"), DateTime.Parse("2020-01-01T23:30"));
             Assert.IsNotNull(charge);
-            Assert.IsTrue((charge.TotalPrice == (decimal)6.5 && charge.Rate == "Night"));
-            
+            var expectedCharge = new Charge() { Rate = "Night", TotalPrice = (decimal)6.5 };
+            Assert.AreEqual(charge, expectedCharge);
+
         }
 
         [TestMethod]
@@ -62,7 +67,9 @@ namespace CarParkRateCalc.API.Tests.Controllers.ControllerTests.V1
             //weekend charge of 10
             var charge = await _controller.CalculateRate(DateTime.Parse("2020-01-04T18:00"), DateTime.Parse("2020-01-04T23:30"));
             Assert.IsNotNull(charge);
-            Assert.IsTrue((charge.TotalPrice == (decimal)10 && charge.Rate == "Weekend"));
+            var expectedCharge = new Charge() { Rate = "Weekend", TotalPrice = (decimal)10 };
+            Assert.AreEqual(charge, expectedCharge);
+            
             
         }
         [TestMethod]
@@ -71,7 +78,9 @@ namespace CarParkRateCalc.API.Tests.Controllers.ControllerTests.V1
             //weekend charge of 10
             var charge = await _controller.CalculateRate(DateTime.Parse("2020-01-04T18:00"), DateTime.Parse("2020-01-04T23:30"));
             Assert.IsNotNull(charge);
-            Assert.IsTrue((charge.TotalPrice == (decimal)10 && charge.Rate == "Weekend"));
+
+            var expectedCharge = new Charge() { Rate = "Weekend", TotalPrice = (decimal)10 };
+            Assert.AreEqual(charge, expectedCharge);
 
         }
 
@@ -81,8 +90,21 @@ namespace CarParkRateCalc.API.Tests.Controllers.ControllerTests.V1
             //weekend charge of 10
             var charge = await _controller.CalculateRate(DateTime.Parse("2020-01-01T18:00"), DateTime.Parse("2020-01-01T18:30"));
             Assert.IsNotNull(charge);
-            Assert.IsTrue((charge.TotalPrice == (decimal)5 && charge.Rate == "Standard"));
+            var expectedCharge = new Charge() { Rate = "Standard", TotalPrice = (decimal)5 };
+            Assert.AreEqual(charge, expectedCharge);
+            //Assert.IsTrue((charge.TotalPrice == (decimal)5 && charge.Rate == "Standard"));
 
+        }
+
+        [TestMethod]
+        public async Task CheckIrregular_EntryMoreThanExit_Inputs()
+        {
+            
+            var expectedCharge = new Charge() { Rate = "Standard", TotalPrice = (decimal)5 };
+            await Assert.ThrowsExceptionAsync<System.ArgumentException>(() =>
+            _controller.CalculateRate(DateTime.Parse("2020-01-02T18:00"), DateTime.Parse("2020-01-01T18:30")
+           ));
+           
         }
 
     }
