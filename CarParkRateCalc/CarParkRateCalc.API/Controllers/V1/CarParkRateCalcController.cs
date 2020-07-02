@@ -51,24 +51,20 @@ namespace CarParkRateCalc.API.Controllers.V1
         /// <response code="204">If the item is null.</response>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Charge))]
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(Charge))]
-        //[ProducesErrorResponseType(typeof(Exception))]
         [HttpGet("entryTime={entryTime}&exitTime={exitTime}")]
         public async Task<IActionResult> CalculateRate(DateTime entryTime, DateTime exitTime)
         {
             if (entryTime == DateTime.MinValue || exitTime == DateTime.MinValue)
             {
                 var message = "Entry and exit times cannot be null";
-                _logger.LogDebug($"CarParkRateCalcControllers::RaiseException::{message}");
-                //throw new ArgumentException("Incorrect Inputs", message);
+                _logger.LogDebug($"CarParkRateCalcControllers::return as bad request::{message}");
                 return BadRequest(message);
             }
             if(entryTime > exitTime)
             {
                 var message = "Entry cannot be less than exit time";
-                _logger.LogDebug($"CarParkRateCalcControllers::RaiseException::{message}");
-                //throw new ArgumentException("Incorrect Inputs", message);
+                _logger.LogDebug($"CarParkRateCalcControllers::return as bad request::{message}");
                 return BadRequest(message);
-                //return null;                
             }
             
             
@@ -79,8 +75,7 @@ namespace CarParkRateCalc.API.Controllers.V1
 
             if (data != null)
                 return Ok(_mapper.Map<Charge>(data));
-            else
-                //return null;
+            else                
                 return NoContent();
             
         }

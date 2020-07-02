@@ -23,14 +23,18 @@ namespace CarParkRateCalc.Services
 
         public async Task<Charge> CalculateRate(DateTime entryTime, DateTime exitTime)
         {
-            RateType PriceTier = DetermineRateType(entryTime, exitTime);
-            return DetermineCharge(PriceTier, entryTime, exitTime);
-            //Apply Standard rate first
-
-
+            RateType PriceTier = DeterminePriceTier(entryTime, exitTime);
+            return DetermineCharge(PriceTier, entryTime, exitTime);     
            
         }
 
+        /// <summary>
+        /// this method calculates actual billing amount
+        /// </summary>
+        /// <param name="priceTier">price tier applicable as per the entry n exit times</param>
+        /// <param name="entryTime"></param>
+        /// <param name="exitTime"></param>
+        /// <returns></returns>
         private Charge DetermineCharge(RateType priceTier, DateTime entryTime, DateTime exitTime)
         {
             decimal cost = (decimal)0.0;
@@ -59,7 +63,7 @@ namespace CarParkRateCalc.Services
             else
                 standardCost = (decimal)(totalCalendarDays * 20); //flat rate for each calendar day.
 
-            //look for the cheapest option for customer;
+            //look for the cheapest option for customer; if standard cost is less, pass on the same
             if (cost != 0 && cost < standardCost)
             {
                 return new Charge() { Rate = priceTier.ToString(), TotalPrice = cost };
@@ -69,7 +73,13 @@ namespace CarParkRateCalc.Services
 
         }
 
-        private RateType DetermineRateType(DateTime entryTime, DateTime exitTime)
+        /// <summary>
+        /// this method determines the price tier to be applied.
+        /// </summary>
+        /// <param name="entryTime"></param>
+        /// <param name="exitTime"></param>
+        /// <returns></returns>
+        private RateType DeterminePriceTier(DateTime entryTime, DateTime exitTime)
         {
             //if less than a day
             if (exitTime.Subtract(entryTime) < new TimeSpan(48, 0, 0))
