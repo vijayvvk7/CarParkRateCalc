@@ -92,7 +92,7 @@ namespace CarParkRateCalc.API.Tests.Controllers.ControllerTests.V1
             Assert.IsNotNull(charge);
             var expectedCharge = new Charge() { Rate = "Standard", TotalPrice = (decimal)5 };
             Assert.AreEqual(charge, expectedCharge);
-            //Assert.IsTrue((charge.TotalPrice == (decimal)5 && charge.Rate == "Standard"));
+            
 
         }
 
@@ -101,10 +101,22 @@ namespace CarParkRateCalc.API.Tests.Controllers.ControllerTests.V1
         {
             
             var expectedCharge = new Charge() { Rate = "Standard", TotalPrice = (decimal)5 };
-            await Assert.ThrowsExceptionAsync<System.ArgumentException>(() =>
+            var exception = await Assert.ThrowsExceptionAsync<System.ArgumentException>(() =>
             _controller.CalculateRate(DateTime.Parse("2020-01-02T18:00"), DateTime.Parse("2020-01-01T18:30")
            ));
+            Assert.AreEqual<string>("Incorrect Inputs (Parameter 'Entry cannot be less than exit time')", exception.Message);
            
+        }
+        [TestMethod]
+        public async Task CheckIrregular_Invalid_Inputs()
+        {
+
+            var expectedCharge = new Charge() { Rate = "Standard", TotalPrice = (decimal)5 };
+            var exception = await Assert.ThrowsExceptionAsync<System.ArgumentException>(() =>
+            _controller.CalculateRate(DateTime.MinValue, DateTime.MinValue
+           ));
+            Assert.AreEqual<string>("Incorrect Inputs (Parameter 'Entry and exit times cannot be null')", exception.Message);
+
         }
 
     }
